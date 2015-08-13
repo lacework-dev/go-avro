@@ -48,3 +48,7 @@ func (this *GenericRecord) Set(name string, value interface{}) {
 func (this *GenericRecord) Schema() Schema {
 	return this.schema
 }
+func (this *GenericRecord) Fields() map[string]interface{} {
+       return this.fields
+}
+
