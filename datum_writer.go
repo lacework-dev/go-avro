@@ -395,7 +395,9 @@ func (this *GenericDatumWriter) writeArray(v interface{}, enc Encoder, s Schema)
 	//TODO should probably write blocks of some length
 	enc.WriteArrayStart(int64(rv.Len()))
 	for i := 0; i < rv.Len(); i++ {
-		this.write(rv.Index(i).Interface(), enc, s.(*ArraySchema).Items)
+		if err := this.write(rv.Index(i).Interface(), enc, s.(*ArraySchema).Items); err!=nil {
+			return err
+		}
 	}
 	enc.WriteArrayNext(0)
 
@@ -403,6 +405,9 @@ func (this *GenericDatumWriter) writeArray(v interface{}, enc Encoder, s Schema)
 }
 
 func (this *GenericDatumWriter) writeMap(v interface{}, enc Encoder, s Schema) error {
+
+	panic("Not supported")
+
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Map {
 		return errors.New("Not a map type")
@@ -457,7 +462,7 @@ func (this *GenericDatumWriter) writeUnion(v interface{}, enc Encoder, s Schema)
 		return this.write(v, enc, unionSchema.Types[index])
 	}
 
-	return fmt.Errorf("Could not write %v as %s", v, s)
+	return fmt.Errorf("Could not write union %v as %s %v\n", v, unionSchema.GetName(), reflect.ValueOf(v))
 }
 
 func (this *GenericDatumWriter) isWritableAs(v interface{}, s Schema) bool {
@@ -506,13 +511,24 @@ func (this *GenericDatumWriter) writeRecord(v interface{}, enc Encoder, s Schema
 	case *GenericRecord:
 		{
 			rs := s.(*RecordSchema)
+
+			if len(rs.Fields) != len(value.Fields()) {
+				return fmt.Errorf("Fields missing or extra fields... %s : %d %v\n", s.GetName(), len(rs.Fields), value)
+			}
 			for i := range rs.Fields {
 				schemaField := rs.Fields[i]
 				field := value.Get(schemaField.Name)
 				if field == nil {
+					// Do not add default fields.
+					if schemaField.Default != nil {
+						return fmt.Errorf("Default field not specified %s %s %v %v\n", s.GetName(), schemaField.Name, value, schemaField.Default)
+					}
 					field = schemaField.Default
 				}
-				this.write(field, enc, schemaField.Type)
+				if err := this.write(field, enc, schemaField.Type); err!=nil {
+					fmt.Printf("Field could not be written %s %v\n", schemaField.Name, value)
+					return err
+				}
 			}
 		}
 	default:

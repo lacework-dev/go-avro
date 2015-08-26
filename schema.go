@@ -452,12 +452,14 @@ func (this *RecordSchema) Prop(key string) (string, bool) {
 func (rs *RecordSchema) Validate(v reflect.Value) bool {
 	v = dereference(v)
 	if v.Kind() != reflect.Struct || !v.CanAddr() || !v.CanInterface() {
+		fmt.Println("Incorrect record structure")
 		return false
 	}
 	rec, ok := v.Interface().(GenericRecord)
 	if !ok {
 		// This is not a generic record and is likely a specific record. Hence
 		// use the basic check.
+		panic("Not supported")
 		return v.Kind() == reflect.Struct
 	}
 
@@ -469,6 +471,7 @@ func (rs *RecordSchema) Validate(v reflect.Value) bool {
 				lhs := key[len(key)-len(rs.Fields[idx].Name) : len(key)]
 				if lhs == rs.Fields[idx].Name {
 					if !rs.Fields[idx].Type.Validate(reflect.ValueOf(val)) {
+						fmt.Println("field validation failed ..", lhs, "..", rs.GetName())
 						return false
 					}
 					field_count++
