@@ -425,13 +425,18 @@ func (this *GenericDatumWriter) writeMap(v interface{}, enc Encoder, s Schema) e
 }
 
 func (this *GenericDatumWriter) writeEnum(v interface{}, enc Encoder, s Schema) error {
+	written := false
+
 	switch v.(type) {
 	case *GenericEnum:
 		{
 			rs := s.(*EnumSchema)
 			for i := range rs.Symbols {
 				if rs.Name == rs.Symbols[i] {
-					this.writeInt(i, enc)
+					if err := this.writeInt(i, enc); err!=nil {
+						return err
+					}
+					written = true
 					break
 				}
 			}
@@ -442,6 +447,7 @@ func (this *GenericDatumWriter) writeEnum(v interface{}, enc Encoder, s Schema) 
 			for i := range rs.Symbols {
 				if v.(string) == rs.Symbols[i] {
 					enc.WriteInt(int32(i))
+					written = true
 					break
 				}
 			}
@@ -449,7 +455,9 @@ func (this *GenericDatumWriter) writeEnum(v interface{}, enc Encoder, s Schema) 
 	default:
 		return fmt.Errorf("%v is not a *GenericEnum", v)
 	}
-
+	if !written {
+		return fmt.Errorf("%v is not a *GenericEnum", v)
+	}
 	return nil
 }
 
@@ -526,7 +534,7 @@ func (this *GenericDatumWriter) writeRecord(v interface{}, enc Encoder, s Schema
 					field = schemaField.Default
 				}
 				if err := this.write(field, enc, schemaField.Type); err!=nil {
-					fmt.Printf("Field could not be written %s %v\n", schemaField.Name, value)
+					fmt.Printf("Field could not be written %s %v\n", schemaField.Name, value, schemaField.Type)
 					return err
 				}
 			}
