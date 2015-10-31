@@ -58,6 +58,7 @@ type Encoder interface {
 // BinaryEncoder implements Encoder and provides low-level support for serializing Avro values.
 type BinaryEncoder struct {
 	buffer *bytes.Buffer
+	tempBuf [10]byte
 }
 
 // Creates a new BinaryEncoder that will write to a given buffer.
@@ -153,18 +154,18 @@ func (this *BinaryEncoder) writeItemCount(count int64) {
 }
 
 func (this *BinaryEncoder) encodeVarint(x int64) []byte {
-	var buf = make([]byte, 10)
+//	var buf = make([]byte, 10)
 	ux := uint64(x) << 1
 	if x < 0 {
 		ux = ^ux
 	}
 	i := 0
 	for ux >= 0x80 {
-		buf[i] = byte(ux) | 0x80
+		this.tempBuf[i] = byte(ux) | 0x80
 		ux >>= 7
 		i++
 	}
-	buf[i] = byte(ux)
+	this.tempBuf[i] = byte(ux)
 
-	return buf[0 : i+1]
+	return this.tempBuf[0 : i+1]
 }

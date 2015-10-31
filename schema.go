@@ -397,6 +397,7 @@ type RecordSchema struct {
 	Aliases    []string `json:"aliases,omitempty"`
 	Properties map[string]string
 	Fields     []*SchemaField `json:"fields"`
+	mapFields  map[string]int
 }
 
 // Returns a JSON representation of RecordSchema.
@@ -462,9 +463,29 @@ func (rs *RecordSchema) Validate(v reflect.Value) bool {
 		panic("Not supported")
 		return v.Kind() == reflect.Struct
 	}
+	// If lengths for value and schema does not match up, then validate will fail
+	if len(rs.Fields) != len(rec.fields) {
+		return false
+	}
+	// Cache names in a map
+	if rs.mapFields == nil {
+		rs.mapFields = make(map[string]int)
+		for idx := range rs.Fields {
+			rs.mapFields[rs.Fields[idx].Name] = idx
+		}
+	}
 
 	field_count := 0
 	for key, val := range rec.fields {
+		// Implement a fast path. If all names of the fields match up, we assume schemas will match too.
+		// This may not be true in general, but in our case it is, and recursively validating fields is 
+		// very expensive.
+		if _,ok:=rs.mapFields[key]; ok {
+			field_count++
+			continue
+		} else {
+			break
+		}
 		for idx := range rs.Fields {
 			// key.Name must have rs.Fields[idx].Name as a suffix
 			if len(rs.Fields[idx].Name) <= len(key) {
