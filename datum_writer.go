@@ -406,8 +406,6 @@ func (this *GenericDatumWriter) writeArray(v interface{}, enc Encoder, s Schema)
 
 func (this *GenericDatumWriter) writeMap(v interface{}, enc Encoder, s Schema) error {
 
-	panic("Not supported")
-
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Map {
 		return errors.New("Not a map type")
