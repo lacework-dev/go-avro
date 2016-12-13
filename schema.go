@@ -478,9 +478,9 @@ func (rs *RecordSchema) Validate(v reflect.Value) bool {
 	field_count := 0
 	for key, val := range rec.fields {
 		// Implement a fast path. If all names of the fields match up, we assume schemas will match too.
-		// This may not be true in general, but in our case it is, and recursively validating fields is 
+		// This may not be true in general, but in our case it is, and recursively validating fields is
 		// very expensive.
-		if _,ok:=rs.mapFields[key]; ok {
+		if _, ok := rs.mapFields[key]; ok {
 			field_count++
 			continue
 		} else {
@@ -523,7 +523,7 @@ func newRecursiveSchema(parent *RecordSchema) *RecursiveSchema {
 
 // Returns a JSON representation of RecursiveSchema.
 func (this *RecursiveSchema) String() string {
-	return fmt.Sprintf(`{"type": "%s"}`, this.Actual.GetName())
+	return (`{"type": "` + this.Actual.GetName() + `"}`)
 }
 
 // Returns a type constant for this RecursiveSchema.
@@ -547,7 +547,7 @@ func (this *RecursiveSchema) Validate(v reflect.Value) bool {
 }
 
 func (this *RecursiveSchema) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, this.Actual.GetName())), nil
+	return []byte(`"` + this.Actual.GetName() + `"`), nil
 }
 
 // SchemaField represents a schema field for Avro record.
@@ -588,7 +588,7 @@ func (this *SchemaField) MarshalJSON() ([]byte, error) {
 
 // Returns a JSON representation of SchemaField.
 func (this *SchemaField) String() string {
-	return fmt.Sprintf("[SchemaField: Name: %s, Doc: %s, Default: %v, Type: %s]", this.Name, this.Doc, this.Default, this.Type)
+	return ("[SchemaField: Name: " + this.Name + ", Doc: " + this.Doc + ", Default: " + this.Default.(string) + ", Type: " + this.Type.String() + "]")
 }
 
 // EnumSchema implements Schema and represents Avro enum type.
@@ -774,7 +774,7 @@ func (this *UnionSchema) String() string {
 		panic(err)
 	}
 
-	return fmt.Sprintf(`{"type": %s}`, string(bytes))
+	return (`{"type": ` + string(bytes) + `}`)
 }
 
 // Returns a type constant for this UnionSchema.

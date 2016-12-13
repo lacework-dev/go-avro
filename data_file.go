@@ -3,9 +3,9 @@ package avro
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"math"
+	"strconv"
 )
 
 const (
@@ -166,7 +166,7 @@ func (this *DataFileReader) NextBlock() error {
 			return err
 		} else {
 			if blockSize > math.MaxInt32 || blockSize < 0 {
-				return errors.New(fmt.Sprintf("Block size invalid or too large: %d", blockSize))
+				return errors.New("Block size invalid or too large: " + strconv.FormatInt(int64(blockSize), 10))
 			}
 
 			block := this.block
