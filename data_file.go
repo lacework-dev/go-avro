@@ -149,8 +149,6 @@ func (this *DataFileReader) Next(v interface{}) (bool, error) {
 			}
 			this.block.BlockRemaining--
 			return true, nil
-		} else {
-			return false, nil
 		}
 	}
 	return false, nil

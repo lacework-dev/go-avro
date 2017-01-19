@@ -395,7 +395,7 @@ func (this *GenericDatumWriter) writeArray(v interface{}, enc Encoder, s Schema)
 	//TODO should probably write blocks of some length
 	enc.WriteArrayStart(int64(rv.Len()))
 	for i := 0; i < rv.Len(); i++ {
-		if err := this.write(rv.Index(i).Interface(), enc, s.(*ArraySchema).Items); err!=nil {
+		if err := this.write(rv.Index(i).Interface(), enc, s.(*ArraySchema).Items); err != nil {
 			return err
 		}
 	}
@@ -431,7 +431,7 @@ func (this *GenericDatumWriter) writeEnum(v interface{}, enc Encoder, s Schema) 
 			rs := s.(*EnumSchema)
 			for i := range rs.Symbols {
 				if rs.Name == rs.Symbols[i] {
-					if err := this.writeInt(i, enc); err!=nil {
+					if err := this.writeInt(i, enc); err != nil {
 						return err
 					}
 					written = true
@@ -531,8 +531,8 @@ func (this *GenericDatumWriter) writeRecord(v interface{}, enc Encoder, s Schema
 					}
 					field = schemaField.Default
 				}
-				if err := this.write(field, enc, schemaField.Type); err!=nil {
-					fmt.Printf("Field could not be written %s %v\n", schemaField.Name, value, schemaField.Type)
+				if err := this.write(field, enc, schemaField.Type); err != nil {
+					fmt.Printf("Field could not be written %s %v %v\n", schemaField.Name, value, schemaField.Type)
 					return err
 				}
 			}
